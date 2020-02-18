@@ -1,0 +1,15 @@
+[package]
+name = "polyfill_using_fastly_compute_at_edge"
+version = "1.0.0"
+authors = ["me@jakechampion.name"]
+edition = "2018"
+
+[profile.release]
+debug = true
+
+[dependencies]
+fastly = "^0.2.0-alpha1"
+regex = "^1"
+lazy_static = "^1.4.0"
+querystring = "^1.1.0"
+error-chain = "0.12.1"

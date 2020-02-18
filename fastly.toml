@@ -1,0 +1,6 @@
+version = "5"
+name = "wasm.polyfill"
+description = "Making polyfill.io work entirely within Fastly"
+authors = ["<jake.champion@ft.com>"]
+language = "rust"
+service_id = "2yTBXvUxVTEObUKBSM6zK3"

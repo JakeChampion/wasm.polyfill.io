@@ -7,7 +7,7 @@ use std::result::Result;
 const PASS: i32 = -1;
 
 fn handle_request(mut req: Request<Body>) -> Result<Response<Body>, Error> {
-    let resp = match (req.method(), req.uri().path()) {
+    match (req.method(), req.uri().path()) {
         (&Method::GET, "/v4/polyfill.min.js") => {
             let (parts, body) = req.into_parts();
             let mut request = Request::from_parts(parts, body);
@@ -19,14 +19,8 @@ fn handle_request(mut req: Request<Body>) -> Result<Response<Body>, Error> {
                 Err(e) => return Result::Err(Error::new(e)),
             }
 
-            let a = request
-                .headers_mut()
-                .insert("HOST", HeaderValue::from_static("polyfill.io"));
-
-            match a {
-                Some(_) => (),
-                None => (),
-            }
+            let headers = request.headers_mut();
+            headers.insert("HOST", HeaderValue::from_static("polyfill.io"));
 
             let norm_resp = request.send("polyfill", PASS);
 
@@ -39,7 +33,9 @@ fn handle_request(mut req: Request<Body>) -> Result<Response<Body>, Error> {
 
             let normalized_ua = match normalized_ua {
                 Some(ua) => (ua.clone()),
-                None => return Result::Err(Error::msg("Normalized-User-Agent header did not exist")),
+                None => {
+                    return Result::Err(Error::msg("Normalized-User-Agent header did not exist"))
+                }
             };
 
             let body = match Body::new() {
@@ -58,36 +54,20 @@ fn handle_request(mut req: Request<Body>) -> Result<Response<Body>, Error> {
                 Err(e) => return Result::Err(Error::new(e)),
             }
 
-            let a = bereq
-                .headers_mut()
-                .insert("HOST", HeaderValue::from_static("polyfill.io"));
-            match a {
-                Some(_) => (),
-                None => (),
-            };
-            let a = bereq.headers_mut().insert("User-Agent", normalized_ua);
-            match a {
-                Some(_) => (),
-                None => (),
-            };
-            let beresp = bereq
-                .send("polyfill", PASS);
-            
-            match beresp {
-                Ok(u) => return Result::Ok(u),
-                Err(e) => return Result::Err(e),
-            };
+            let headers = bereq.headers_mut();
+
+            headers.insert("HOST", HeaderValue::from_static("polyfill.io"));
+
+            headers.insert("User-Agent", normalized_ua);
+
+            bereq.send("polyfill", PASS)
         }
         _ => {
-            req.headers_mut()
-                .insert("HOST", HeaderValue::from_static("polyfill.io"))
-                .expect("uh oh 40");
-            let beresp = req.send("polyfill", PASS).expect("malform backend request");
-            beresp
+            let headers = req.headers_mut();
+            headers.insert("HOST", HeaderValue::from_static("polyfill.io"));
+            req.send("polyfill", PASS)
         }
-    };
-
-    Ok(resp)
+    }
 }
 fn main() -> Result<(), Error> {
     let req = downstream_request()?;

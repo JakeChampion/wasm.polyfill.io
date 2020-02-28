@@ -12,22 +12,14 @@ fn handle_request(mut req: Request<Body>) -> Result<Response<Body>, Error> {
             let (parts, body) = req.into_parts();
             let mut request = Request::from_parts(parts, body);
 
-            let uri = "https://polyfill.io/v3/normalizeUa".parse::<Uri>();
+            let uri = "https://polyfill.io/v3/normalizeUa".parse::<Uri>()?;
 
-            match uri {
-                Ok(u) => *request.uri_mut() = u,
-                Err(e) => return Result::Err(Error::new(e)),
-            }
+            *request.uri_mut() = uri;
 
             let headers = request.headers_mut();
             headers.insert("HOST", HeaderValue::from_static("polyfill.io"));
 
-            let norm_resp = request.send("polyfill", PASS);
-
-            let norm_resp = match norm_resp {
-                Ok(resp) => resp,
-                Err(e) => return Result::Err(e),
-            };
+            let norm_resp = request.send("polyfill", PASS)?;
 
             let normalized_ua = norm_resp.headers().get("Normalized-User-Agent");
 
@@ -38,21 +30,13 @@ fn handle_request(mut req: Request<Body>) -> Result<Response<Body>, Error> {
                 }
             };
 
-            let body = match Body::new() {
-                Ok(b) => b,
-                Err(e) => return Result::Err(e),
-            };
+            let body = Body::new()?;
 
             let mut bereq = Request::new(body);
             *bereq.method_mut() = Method::GET;
             *bereq.version_mut() = Version::HTTP_11;
 
-            let uri = "https://polyfill.io/v3/polyfill.min.js".parse::<Uri>();
-
-            match uri {
-                Ok(u) => *bereq.uri_mut() = u,
-                Err(e) => return Result::Err(Error::new(e)),
-            }
+            *bereq.uri_mut() = "https://polyfill.io/v3/polyfill.min.js".parse::<Uri>()?;
 
             let headers = bereq.headers_mut();
 

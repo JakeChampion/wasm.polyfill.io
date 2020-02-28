@@ -97,7 +97,7 @@ fn main() -> Result<(), Error> {
         }
         Err(e) => {
             let mut resp = Response::new(Vec::from(e.to_string()));
-            *resp.status_mut() = StatusCode::IM_A_TEAPOT;
+            *resp.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
             resp.send_downstream()?;
         }
     }

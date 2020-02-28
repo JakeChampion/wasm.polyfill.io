@@ -25,7 +25,7 @@ fn handle_request(mut req: Request<Body>) -> Result<Response<Body>, Error> {
 
             match a {
                 Some(_) => (),
-                None => return Result::Err(Error::msg("oh no")),
+                None => (),
             }
 
             let norm_resp = request.send("polyfill", PASS);
@@ -39,7 +39,7 @@ fn handle_request(mut req: Request<Body>) -> Result<Response<Body>, Error> {
 
             let normalized_ua = match normalized_ua {
                 Some(ua) => (ua.clone()),
-                None => return Result::Err(Error::msg("oh no")),
+                None => return Result::Err(Error::msg("Normalized-User-Agent header did not exist")),
             };
 
             let body = match Body::new() {
@@ -63,12 +63,12 @@ fn handle_request(mut req: Request<Body>) -> Result<Response<Body>, Error> {
                 .insert("HOST", HeaderValue::from_static("polyfill.io"));
             match a {
                 Some(_) => (),
-                None => return Result::Err(Error::msg("oh no")),
+                None => (),
             };
             let a = bereq.headers_mut().insert("User-Agent", normalized_ua);
             match a {
                 Some(_) => (),
-                None => return Result::Err(Error::msg("oh no")),
+                None => (),
             };
             let beresp = bereq
                 .send("polyfill", PASS);

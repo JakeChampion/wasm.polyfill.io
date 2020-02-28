@@ -69,14 +69,21 @@ fn handle_request(mut req: Request<Body>) -> Result<Response<Body>, Error> {
         }
     }
 }
+
 fn main() -> Result<(), Error> {
     let req = downstream_request()?;
+    let debug = req.headers().contains_key("Fastly-Debug");
     match handle_request(req) {
         Ok(resp) => {
             resp.send_downstream()?;
         }
         Err(e) => {
-            let mut resp = Response::new(Vec::from(e.to_string()));
+            let mut resp;
+            if debug {
+                resp = Response::new(Vec::from(e.to_string()));
+            } else {
+                resp = Response::new(Vec::from(""));
+            }
             *resp.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
             resp.send_downstream()?;
         }
